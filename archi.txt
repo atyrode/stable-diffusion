@@ -1,0 +1,50 @@
+
+PIPELINE / notes:
+
+Générateur de prompt -> queue de prompts
+[ prompt manuel -> queue de prompts avec prio+]
+
+queue de prompt ->(consomme) stable diffusion -> output queue
+ouput queue est consommé par bot.py
+Bot.py -> DISCORD (images)
+Discord -> bot_listener -> action -> queue prompt
+	   		   	  -> notation qualy
+
+
+DB -> enregistre -> prompts, uuid, note, date
+
+Front de lecture de la db et d'association avec l'image
+
+----
+
+A DEV:
+- bot publisher(PromptQueue) -> génération de prompt
+- bot consumer(PromptQueue) -> consommation des prompts par stable diffusion
+  -> systemctl managed
+  -> Charge le modèle at start
+  -> lance stable diffusion (avec le modèle)
+  -> LOG dans la DB
+  -> akcknoledge queue
+
+- bot send_to_discord
+  -> image
+  -> get notes
+  -> update NOTE tables
+  -> update sent_to_discord
+
+- (nice to have) tool pour display l'image avec prompt, notes, etc...
+-> eventuellement recherche
+-> eventuellement ajout de commentaire, ajout de notes, etc...
+-> eventuellement relancer des trucs
+
+---
+
+DEV DE FOND
+-> Fine tune de stable diff
+
+---
+
+CLEVER :
+- Queues
+- PG (TABLE [log/result] id, prompt, uuid d'image, notes, date, sent_to_discrod(bool) // TABLE [NOTES] id, notes, commentaires...)
+- Storage object -> BACKUP images weekly (par ex)
