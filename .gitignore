@@ -5,3 +5,5 @@ logs/*
 models/*
 .env
 *.ckpt
+temp_maker.py
+TODO
