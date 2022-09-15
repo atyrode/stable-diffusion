@@ -7,3 +7,4 @@ models/*
 *.ckpt
 temp_maker.py
 TODO
+benchmark.png
