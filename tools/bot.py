@@ -17,9 +17,6 @@ CHANNEL_COMPARISON = 1019670129946144820
 
 client = Client(PULSAR_URL)
 consumer = client.subscribe("result-post-discord", "result-post-discord-reading")
-benchmark_consumer = client.subscribe(
-    "benchmark-result-post-discord", "benchmark-result-post-discord-reading"
-)
 
 # Not used rn
 consumer_check = client.subscribe("empty-queue-signal", "empty-queue-signal-reading")
@@ -42,37 +39,20 @@ class Bot(discord.Client):
     async def fetch_queue(self):
 
         try:
-            msg = benchmark_consumer.receive(timeout_millis=500)
-            benchmark_consumer.acknowledge(msg)
-            prompt_info = msg.data().decode("utf-8")
-
-            try:
-                channel = self.get_channel(CHANNEL_COMPARISON)
-                await channel.send(prompt_info, file=discord.File("benchmark.png"))
-
-                benchmark_consumer.acknowledge(msg)
-
-            except Exception as e:
-                print(e)
-                benchmark_consumer.negative_acknowledge(msg)
-
-        except Exception:
-            print("Timed out! No image to send in discord for benchmarking")
-
-        try:
             msg = consumer.receive(timeout_millis=500)
             pulsar_data = msg.data().decode("utf-8")
             data = json.loads(pulsar_data)
-
+            print(data)
             try:
-                channel = self.get_channel(CHANNEL_RESULTS)
-                text = f'[**{data["prompt"]}**] Seed: {data["seed"]} Steps: {data["steps"]}'
-                await channel.send(text, file=discord.File(data["path"]))
+                for file in data["files_path"]:
+                    channel = self.get_channel(CHANNEL_NSFW)
+                    text = f'[**{data["prompt"]}**] Seed: {data["seed"]} Steps: {data["steps"]}'
+                    await channel.send(text, file=discord.File(file))
 
                 consumer.acknowledge(msg)
 
             except Exception as e:
-                print(e)
+                print("error:" + e)
                 consumer.negative_acknowledge(msg)
 
         except Exception:
